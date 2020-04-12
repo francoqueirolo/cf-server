@@ -8,8 +8,6 @@ var authenticate = require('../authenticate');
 const bodyParser = require('body-parser');
 router.use(bodyParser.json());
 
-const Users = require('../models/users');
-
 router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next) => {
   User.find({})
   .then((users) => {
