@@ -8,9 +8,21 @@ var authenticate = require('../authenticate');
 const bodyParser = require('body-parser');
 router.use(bodyParser.json());
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+const Users = require('../models/users');
 
-  //var admin = authenticate.verifyUser(req);
+router.route('/')
+.post(authenticate.verifyAdmin, (req, res, next) => {
+  Users.find({})
+    .populate('comments.author')
+    .then(users => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(users);
+    }, (err) => next(err))
+    .catch((err) => next(err));
+})
+
+router.post('/login', passport.authenticate('local'), (req, res) => {
   var token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
