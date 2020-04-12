@@ -10,17 +10,15 @@ router.use(bodyParser.json());
 
 const Users = require('../models/users');
 
-router.route('/')
-.post(authenticate.verifyAdmin, (req, res, next) => {
-  Users.find({})
-    .populate('comments.author')
-    .then(users => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(users);
-    }, (err) => next(err))
-    .catch((err) => next(err));
-})
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next) => {
+  User.find({})
+  .then((users) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(users);
+  }, (err) => next(err))
+  .catch((err) => next(err));
+});
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
   var token = authenticate.getToken({_id: req.user._id});
@@ -30,7 +28,7 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
 });
 
 router.post('/signup', (req, res, next) => {
-  User.register(new User({username: req.body.username}), 
+  User.register(new User({username: req.body.username}),
     req.body.password, (err, user) => {
     if(err) {
       res.statusCode = 500;
