@@ -8,6 +8,8 @@ var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 var uploadRouter = require('./routes/uploadRouter');
+var favoriteRouter = require('./routes/favoriteRouter');
+
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 var passport = require('passport');
@@ -49,6 +51,7 @@ app.use('/users', usersRouter);
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
+app.use('/favorites', favoriteRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

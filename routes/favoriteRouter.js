@@ -28,10 +28,6 @@ router.route('/favorites')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.put(authenticate.verifyUser, (req, res, next) => {
-    res.statusCode = 403;
-    res.end('PUT operation not supported on /favotites');
-})
 .delete(authenticate.verifyUser, (req, res, next) => {
     Favorites.remove({})
     .then((fav) => {
@@ -42,7 +38,7 @@ router.route('/favorites')
     .catch((err) => next(err));
 });
 
-router.route('/:favId')
+router.route('/:dishId')
 .get((req,res,next) => {
     Favorites.findById(req.params.favId)
     .then((fav) => {
@@ -52,15 +48,10 @@ router.route('/:favId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(authenticate.verifyAdmin, (req, res, next) => {
-    res.statusCode = 403;
-    res.end('POST operation not supported on /favorites/'+ req.params.favId);
-})
-.put(authenticate.verifyAdmin, (req, res, next) => {
-    Favorites.findByIdAndUpdate(req.params.favId, {
-        $set: req.body
-    }, { new: true })
+.post(authenticate.verifyUser, (req, res, next) => {
+  Favorites.create(req.body)
     .then((fav) => {
+        console.log('Favorite Created ', fav);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(fav);
