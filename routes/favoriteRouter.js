@@ -1,71 +1,100 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const Favorite = require('../models/favorites');
+const Dish = require('./dishRouter');
+const authenticate = require('../authenticate');
+const cors = require('./cors');
+const favoriteRouter = express.Router();
 
-const Favorites = require('../models/favorites');
-const router = express.Router();
+favoriteRouter.use(bodyParser.json());
 
-var authenticate = require('../authenticate');
-
-router.use(bodyParser.json());
-
-router.route('/favorites')
-.get((req,res,next) => {
-    Favorites.find({})
-    .then((fav) => {
+favoriteRouter.route('/')
+.options(cors.corsWithOptions, (req, res) => {res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
+    Favorite.find({})
+    .populate('dishes._id')
+    .then((favorites) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(fav);
+        res.json(favorites);
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
-  Favorites.create(req.body)
-    .then((fav) => {
-        console.log('Favorite Created ', fav);
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(fav);
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    Favorite.findById(req.body.dishId)
+    .then((dish) => {
+        if (dish != null && Favorite.user == req.user._id) {
+            dish._id.push(req.body);
+            dish.save()
+            .then((dish) => {
+                Dishes.findById(dish._id)
+                    .then((dish) => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(dish);
+                    })
+            }, (err) => next(err));
+        }
+        else {
+            err = new Error('Dish ' + req.body.dishId + ' not found');
+            err.status = 404;
+            return next(err);
+        }
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
-    Favorites.remove({})
-    .then((fav) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    Favorite.remove({})
+    .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(fav);
+        res.json(resp);
     }, (err) => next(err))
     .catch((err) => next(err));
 });
 
-router.route('/:dishId')
-.get((req,res,next) => {
-    Favorites.findById(req.params.favId)
-    .then((fav) => {
+favoriteRouter.route('/:dishId')
+.options(cors.corsWithOptions, (req, res) => {res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
+    Favorite.findById(req.params.dishId)
+    .then((favorite) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(fav);
+        res.json(favorite);
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
-  Favorites.create(req.body)
-    .then((fav) => {
-        console.log('Favorite Created ', fav);
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(fav);
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    Favorite.findById(req.body.dishId)
+    .then((dish) => {
+        if (dish != null && Favorite.user == req.user._id) {
+            dish._id.push(req.body);
+            dish.save()
+            .then((dish) => {
+                Dishes.findById(dish._id)
+                    .then((dish) => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(dish);
+                    })
+            }, (err) => next(err));
+        }
+        else {
+            err = new Error('Dish ' + req.body.dishId + ' not found');
+            err.status = 404;
+            return next(err);
+        }
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.delete(authenticate.verifyAdmin, (req, res, next) => {
-    Favorites.findByIdAndRemove(req.params.favId)
-    .then((fav) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    Favorite.findByIdAndRemove(req.params.dishId)
+    .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(fav);
+        res.json(resp);
     }, (err) => next(err))
     .catch((err) => next(err));
 });
 
-module.exports = router;
+module.exports = favoriteRouter;

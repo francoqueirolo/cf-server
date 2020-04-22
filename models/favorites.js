@@ -1,19 +1,20 @@
 const mongoose = require('mongoose');
-require('mongoose-currency').loadType(mongoose);
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
-var favoriteSchema = new Schema({
-    users: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    dishes: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Dishes'
-  }
+const favoriteSchema = new Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  dishes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Dish',
+  }],
 }, {
-    timestamps: true
+  timestamps: true,
 });
 
-module.exports = mongoose.model('Favorites', favoriteSchema);;
+const Favorites = mongoose.model('Favorite', favoriteSchema);
+
+module.exports = Favorites;

@@ -2,6 +2,11 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
+var session = require('express-session');
+var FileStore = require('session-file-store')(session);
+var passport = require('passport');
+var config = require('./config');
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
@@ -9,11 +14,6 @@ var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 var uploadRouter = require('./routes/uploadRouter');
 var favoriteRouter = require('./routes/favoriteRouter');
-
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
-var passport = require('passport');
-var config = require('./config');
 
 const mongoose = require('mongoose');
 const url = config.mongoUrl;
